@@ -3,11 +3,12 @@ import numpy as np
 from random import randint
 
 class sim_annealing:
-    def __init__(self, circuit, sa_max=3, alpha_rate=0.1):
+    def __init__(self, circuit, sa_max=3, alpha_rate=0.9):
         self.sa_max = sa_max
         self.alpha_rate = alpha_rate
         self.circuit = circuit
         self.best_solution = self.cost_calc()
+        self.t0 = self.initial_temperature()
     
     def cost_calc(self):
         distance = 0
@@ -51,3 +52,16 @@ class sim_annealing:
                 break
         self.switch_edge(neighbour, elim_index)
         return neighbour
+    
+    def initial_temperature(self):
+        for i in range(3):
+            n_0 = self.gen_neighbour()
+            n_1 = self.gen_neighbour()
+            n_2 = self.gen_neighbour()
+
+            t0 = (n_0.cost_calc() + n_1.cost_calc() + n_2.cost_calc())/3
+        return t0
+    
+    def solution(self):
+        solution = self.best_solution
+        
