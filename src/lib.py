@@ -9,11 +9,13 @@ class circuit_point:
         self.connection_num = 0
     def add_connection(self):
         self.connection_num += 1
+    def sub_connection(self):
+        self.connection_num -= 1
 
 class circuit_connection:
     def __init__(self, o_point, d_point):
-        self.origin_point = o_point
-        self.destin_point = d_point
+        self.a_point = o_point
+        self.b_point = d_point
 
 class circuit:
     def __init__(self, num_points, num_connect, max_conn, x_positions, y_positions):
@@ -29,19 +31,24 @@ class circuit:
             index += 1
         # INICIALIZACAO DE CONECCOES ATRIBUIDAS ENTRE PONTOS ALEATORIAMENTE
         self.connections_list = [] # Armazena os pontos que ainda nao foram conectados pelo menos uma vez
-        non_assigned_points = list(range(0, self.num_points))
-        for i in range(num_connect):
-            while True:
-                a_index = randint(0, self.num_points-1)
-                b_index = randint(0, self.num_points-1)
-                if b_index != a_index and self.points_list[a_index].connection_num < max_conn and self.points_list[b_index].connection_num < max_conn:
-                    break
-            if a_index in non_assigned_points:
-                non_assigned_points.remove(a_index) # Remove o ponto conectado da lista de nao conectados
-            if b_index in non_assigned_points:
-                non_assigned_points.remove(b_index) # Remove o ponto conectado da lista de nao conectados
-            self.connections_list.append(circuit_connection(self.points_list[a_index], self.points_list[b_index]))
+        while True:
+            for i in range(num_connect): # Gera uma solucao inicial
+                while True:
+                    a_index = randint(0, self.num_points-1)
+                    b_index = randint(0, self.num_points-1)
+                    if b_index != a_index and self.points_list[a_index].connection_num < max_conn and self.points_list[b_index].connection_num < max_conn:
+                        break
+                self.connections_list.append(circuit_connection(self.points_list[a_index], self.points_list[b_index]))
+                self.points_list[a_index].add_connection()
+                self.points_list[b_index].add_connection()
+
+            valid_solution = True # Checa se a solucao inicial e valida levando em consideracao que todos os pontos devem estar conectados
+            for connection in self.connections_list:
+                if connection.a_point.connection_num == 0 or connection.b_point.connection_num == 0:
+                    valid_solution = False
+            if valid_solution:
+                break
 
     def print_circuit(self):
         for i, connection in enumerate(self.connections_list):
-            print(f"Aresta {i}-> {connection.origin_point.id}--{connection.destin_point.id}")
+            print(f"Aresta {i}-> {connection.a_point.id}--{connection.b_point.id}")
