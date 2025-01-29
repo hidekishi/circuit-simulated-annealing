@@ -19,6 +19,8 @@ class circuit_connection:
 
 class circuit:
     def __init__(self, num_points, num_connect, max_conn, x_positions, y_positions):
+        self.max_connection = max_conn
+        self.num_connections = num_connect
         # CHECAGEM SE O NUMERO DE PONTOS INFORMADO != NUMERO DE PONTOS PASSADOS
         if num_points != len(x_positions) or num_points != len(y_positions):
             print("Número de pontos indicado é diferente do número de coordenadas passadas. A operação seguirá apenas levando em consideração o número de coordenadas!")
