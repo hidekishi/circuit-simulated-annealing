@@ -1,5 +1,6 @@
 #import random
 from random import randint
+import numpy as np
 
 class circuit_point:
     def __init__(self, id, x, y):
@@ -50,6 +51,22 @@ class circuit:
                     valid_solution = False
             if valid_solution:
                 break
+
+    def cost_calc(self):
+        distance = 0
+        for edge in self.connections_list:
+            a_point = edge.a_point
+            b_point = edge.b_point
+
+            a_x = a_point.x
+            a_y = a_point.y
+            b_x = b_point.x
+            b_y = b_point.y
+
+            edge_cost = np.sqrt((a_x-b_x)**2+(a_y-b_y)**2)
+            #print(f"{a_x} {b_x} {edge_cost}")
+            distance += edge_cost
+        return distance
 
     def print_circuit(self):
         for i, connection in enumerate(self.connections_list):

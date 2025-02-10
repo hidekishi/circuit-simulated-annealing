@@ -7,24 +7,8 @@ class sim_annealing:
         self.sa_max = sa_max
         self.alpha_rate = alpha_rate
         self.circuit = circuit
-        self.best_solution = self.cost_calc()
+        self.best_solution = circuit.cost_calc()
         self.t0 = self.initial_temperature()
-    
-    def cost_calc(self):
-        distance = 0
-        for edge in self.circuit.connections_list:
-            a_point = edge.a_point
-            b_point = edge.b_point
-
-            a_x = a_point.x
-            a_y = a_point.y
-            b_x = b_point.x
-            b_y = b_point.y
-
-            edge_cost = np.sqrt((a_x-b_x)**2+(a_y-b_y)**2)
-            #print(f"{a_x} {b_x} {edge_cost}")
-            distance += edge_cost
-        return distance
 
     def switch_edge(self, circuit, edge_i):
         edge = self.circuit.connections_list[edge_i]
@@ -64,4 +48,19 @@ class sim_annealing:
     
     def solution(self):
         solution = self.best_solution
-        
+        t = self.initial_temperature()
+
+        while t > 0.05:
+            for i in range(self.sa_max):
+                neighbour = self.gen_neighbour()
+                new_solution = neighbour.cost_calc()
+                if new_solution < solution:
+                    solution = new_solution
+                    if solution < self.best_solution:
+                        self.best_solution = solution
+                else:
+                    if np.exp(-(new_solution-solution)/t)*100 >= randint(0, 100):
+                        solution = new_solution
+            t = self.alpha_rate*t
+            print(self.best_solution)
+
