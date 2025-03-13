@@ -1,5 +1,6 @@
 import numpy as np
 from random import randint
+from copy import deepcopy
 
 class point:
     def __init__(self, id, x, y):
@@ -51,9 +52,10 @@ class circuit:
         for i in range(point_num):
             self.points_list.append(point(i, x_list[i], y_list[i]))
         # INICIALIZA CONEXOES ALEATORIAS
-        while(True):
+        while True:
             for p in self.points_list:
                 p.connection_num = 0
+                p.connected_points = []
             self.connections_list = []
             for i in range(connection_num):
                 # GARANTE QUE OS DOIS PONTOS SELECIONADOS SERAO DIFERENTES
@@ -76,6 +78,7 @@ class circuit:
     def print_circuit(self):
         for i, c in enumerate(self.connections_list):
             print(f"{i} -> {c.a_point.id} --- {c.b_point.id}; Custo = {c.cost}")
+        print()
     # FUNCAO PARA PRINTAR O NUMERO DE CONEXOES DE CADA PONTO
     def print_points_stats(self):
         for p in self.points_list:
@@ -83,6 +86,7 @@ class circuit:
             for po in p.connected_points:
                 print(f"{po.id}", end=' ')
             print()
+        print()
     # FUNCAO PARA CALCULO DE CUSTO DO CIRCUITO
     def cost_calc(self):
         cost = 0
@@ -96,13 +100,28 @@ class circuit:
             print("ERRO: Número de conexões insuficientes na lista!")
             return False
         # CHECA SE TODOS OS PONTOS POSSUEM PELO MENOS UMA CONEXAO
-        while(True):
+        while True:
             for p in self.points_list:
                 if p.connection_num == 0:
                     print("ERRO: Circuito possui ponto(s) desconectado(s)")
                     return False
+            if not is_circuit_connected(deepcopy(self.points_list)):
+                return False
             break
         return True
 # CHECA CONECTIVIDADE DO GRAFO
-def is_circuit_connected(circuit):
-    points = circuit.points_list
+def is_circuit_connected(points_list):
+    points = points_list[0].connected_points
+    non_visited = points_list
+    def visit_point(points):
+        if len(non_visited) == 0:
+            return True
+        else:
+            for p in points:
+                if p in non_visited:
+                    non_visited.remove(p)
+                points.remove(p)
+                if visit_point(p.connected_points):
+                    return True
+            return False
+    return visit_point(points)

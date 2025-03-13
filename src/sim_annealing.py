@@ -1,4 +1,4 @@
-from circuit import circuit, point, connection
+from circuit import circuit, point, connection, is_circuit_connected
 from random import randint
 from copy import deepcopy
 import matplotlib.pyplot as plt
@@ -7,6 +7,7 @@ import numpy as np
 class simulated_annealing:
     def __init__(self, circuit, sa_max=3, alpha_rate=0.9):
         self.circuit = circuit
+        self.original_circuit = deepcopy(circuit)
         self.sa_max = sa_max
         self.alpha = alpha_rate
         self.best_solution = self.solution()
@@ -17,7 +18,6 @@ class simulated_annealing:
         self.circuit.print_points_stats()
         print(f"Custo da solução inicial = {self.circuit.cost}")
         self.plot_graph("./grafico/inicial.png")
-        best_solution = 99999
         # GERA UM VIZINHO COM BASE NO CIRCUITO ATUAL
         def generate_neighbour(original_circuit):
             neighbour_circuit = deepcopy(original_circuit)
@@ -49,26 +49,34 @@ class simulated_annealing:
             v2 = generate_neighbour(self.circuit).cost
             v3 = generate_neighbour(self.circuit).cost
             return (v1+v2+v3)/3
-        t = initial_t()
-        counter = 0
-        while t > 0.0001:
-            counter += 1
-            print(f". {counter}° iter cost = {self.circuit.cost:.{3}f}")
-            for i in range(self.sa_max):
-                new_circuit = generate_neighbour(self.circuit)
-                new_solution = new_circuit.cost
-                current_solution = self.circuit.cost
-                delta = new_solution - current_solution
-                if delta < 0:
-                    self.circuit = new_circuit
-                    if new_solution < best_solution:
-                        best_circuit = new_circuit
-                        best_solution = best_circuit.cost
-                else:
-                    if randint(0, 100) < np.exp(-delta/t)*100:
+        while True:
+            self.circuit = deepcopy(self.original_circuit)
+            best_solution = 999
+            t = initial_t()
+            counter = 0
+            iteration_string = ""
+            while t > 0.0001:
+                counter += 1
+                iteration_string = iteration_string + f". {counter}° iter cost = {self.circuit.cost:.{3}f}\n"
+                #print(f". {counter}° iter cost = {self.circuit.cost:.{3}f}")
+                for i in range(self.sa_max):
+                    new_circuit = generate_neighbour(self.circuit)
+                    new_solution = new_circuit.cost
+                    current_solution = self.circuit.cost
+                    delta = new_solution - current_solution
+                    if delta < 0:
                         self.circuit = new_circuit
-                t = t*self.alpha
-        self.circuit = best_circuit
+                        if new_solution < best_solution:
+                            best_circuit = new_circuit
+                            best_solution = best_circuit.cost
+                    else:
+                        if randint(0, 100) < np.exp(-delta/t)*100:
+                            self.circuit = new_circuit
+                    t = t*self.alpha
+            self.circuit = best_circuit
+            if self.circuit.is_circuit_valid():
+                break
+        print(iteration_string)
         print("Circuito de melhor custo: ")
         self.circuit.print_circuit()
         self.circuit.print_points_stats()
@@ -97,7 +105,6 @@ class simulated_annealing:
         for conn in connections:
             p1 = conn.a_point
             p2 = conn.b_point
-            print(p1.id, p2.id)
             ax.plot([p1.x, p2.x], [p1.y, p2.y], 'k-', linewidth=1)
         
         plt.xlabel('X')

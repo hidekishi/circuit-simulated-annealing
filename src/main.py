@@ -1,4 +1,4 @@
-from circuit import point, connection, circuit
+from circuit import point, connection, circuit, is_circuit_connected
 from sim_annealing import simulated_annealing
 
 with open("input.txt", "r") as file:
@@ -12,4 +12,3 @@ y = [float(x) for x in lines[4].split()]
 
 circuito = circuit(x, y, point_num, connection_num, max_conn)
 teste = simulated_annealing(circuito)
-print(teste.best_solution)
