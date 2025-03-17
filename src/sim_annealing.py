@@ -51,7 +51,8 @@ class simulated_annealing:
             return (v1+v2+v3)/3
         while True:
             self.circuit = deepcopy(self.original_circuit)
-            best_solution = 999
+            best_circuit = self.circuit
+            best_solution = self.circuit.cost
             t = initial_t()
             counter = 0
             iteration_string = ""
